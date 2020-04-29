@@ -34,12 +34,11 @@ function Log(address, port, message)
 end
 
 function CheckBanList(nickname)
-	local line
 	local file = io.open("banlist", "rb")
 	io.output(file)
 	file:seek("set")
 	while true do
-		line = file:read()
+		local line = file:read()
 		if nickname == line then return 0 end	
 		if line == nil then return 1 end 		
 	end
@@ -72,10 +71,9 @@ function FloodReset()
 end
 
 function Manager()
-	local _, _, address, port, _, message
 	local lastaddress, nickname, mute
 	while true do
-		_, _, address, port, _, message = event.pull("modem_message")
+		local _, _, address, port, _, message = event.pull("modem_message")
 		if 	port == primaryPort then 
 			if isFlooder == true and flooder == address then goto continue
 			else PrimaryLevel(message) end
@@ -104,11 +102,10 @@ end
 function PingUsers()
 	while true do
 		local online = {}
-		local _, _, address, port, _, username, packet
 		event.pull(30, "waiting")
 		modem.broadcast(253, 'P')
 		while true do
-			_, _, address, port, _, username = event.pull(3, "modem_message")
+			local _, _, address, port, _, username = event.pull(3, "modem_message")
 			if port == nil then break end
 			if port == 253 then table.insert(online, username) end
 		end
@@ -126,11 +123,10 @@ function RegistrationLevel(address, message)
 	else if string.find(user[1], "[%p%c%d]") ~= nil then
 		modem.send(address, 255, "Name contains incorrect characters")
 		else
-			local line
 			local file = io.open("users", "rb")
 			io.output(file)
 			while true do
-				line = file:read()
+				local line = file:read()
 				if user[1] == line then
 					modem.send(address, 255, "User already exist")
 					break end		
@@ -157,12 +153,11 @@ end
 
 function AuthenticationLevel(address, message)
 	local user = serialization.unserialize(message)
-	local line
 	local file = io.open("users", "rb")
 	io.output(file)
 	file:seek("set")
 	while true do
-		line = file:read()
+		local line = file:read()
 		if user[1] == line then
 			if CheckBanList(user[1]) == 0 then 
 				modem.send(address, 256, -1) break end
@@ -182,10 +177,9 @@ function AuthenticationLevel(address, message)
 end
 
 function PrimaryLevel(message)
-	local check, nicklen, mlen
-	check = text.trim(message)
-	nicklen = string.find(check, ':')
-	mlen = unicode.len(message) - nicklen - 2
+	local check = text.trim(message)
+	local nicklen = string.find(check, ':')
+	local mlen = unicode.len(message) - nicklen - 2
 	if mlen > 0 and mlen < 256 
 		then modem.broadcast(primaryPort, message) end
 end
