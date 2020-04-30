@@ -17,8 +17,8 @@ function InitialiseFiles()
 	local shell = require("shell")
 	shell.setWorkingDirectory("/chat/")
 	local curDir = shell.getWorkingDirectory()
-	local users = io.open(curDir .. "users", "ab")     users:close(users)
-	local banlist = io.open(curDir .. "banlist", "ab") banlist:close(banlist)
+	local users = io.open(curDir .. "users", "a")     users:close(users)
+	local banlist = io.open(curDir .. "banlist", "a") banlist:close(banlist)
 	if fs.size(curDir .. "log") > 500000 then
 		fs.rename(curDir .. "log", curDir .. "log_old")
 		print("New log file created. Old log file saved as log_old")
@@ -26,7 +26,7 @@ function InitialiseFiles()
 end
 
 function Log(address, port, message)
-	local log = io.open("log", "ab")
+	local log = io.open("log", "a")
 	io.input(log)
 	log:seek("end")	
 	log:write(address .. ':' .. port .. '\n' .. message .. '\n')
@@ -34,7 +34,7 @@ function Log(address, port, message)
 end
 
 function CheckBanList(nickname)
-	local file = io.open("banlist", "rb")
+	local file = io.open("banlist", "r")
 	io.output(file)
 	file:seek("set")
 	while true do
@@ -47,7 +47,7 @@ end
 
 function AddToBanList(nickname)
 	if CheckBanList(nickname) == 1 then
-		local file = io.open("banlist", "ab")
+		local file = io.open("banlist", "a")
 		io.input(file)
 		file:seek("end")
 		file:write(string.format("%s\n", nickname))
@@ -123,7 +123,7 @@ function RegistrationLevel(address, message)
 	else if string.find(user[1], "[%p%c%d]") ~= nil then
 		modem.send(address, 255, "Name contains incorrect characters")
 		else
-			local file = io.open("users", "rb")
+			local file = io.open("users", "r")
 			io.output(file)
 			while true do
 				local line = file:read()
@@ -137,7 +137,7 @@ function RegistrationLevel(address, message)
 					break end
 				if line == nil then
 					file:close(file)
-					file = io.open("users", "ab")
+					file = io.open("users", "a")
 					io.input(file)
 					local c = file:seek("end")
 					if c ~= 0 then file:write(string.format("\n%s\n%s\n%s", user[1], user[2], address))
@@ -153,7 +153,7 @@ end
 
 function AuthenticationLevel(address, message)
 	local user = serialization.unserialize(message)
-	local file = io.open("users", "rb")
+	local file = io.open("users", "r")
 	io.output(file)
 	file:seek("set")
 	while true do
